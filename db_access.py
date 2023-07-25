@@ -22,7 +22,7 @@ def connect_to_db():
 def execute_query(sql_query):
     db_connection = connect_to_db()
     cursorObject = db_connection.cursor()
-    cursorObject.execute(sql_query)
+    return cursorObject.execute(sql_query)
 
 
     # db_connection = connect_to_db()
