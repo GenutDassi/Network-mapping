@@ -8,11 +8,11 @@ import technician_in_db
 
 
 async def login(name, password):
-    return authorization_and_authentication.login(name, password)
+    return await authorization_and_authentication.login(name, password)
 
 
 async def signup(name, password):
-    return authorization_and_authentication.signup(name, password)
+    return await authorization_and_authentication.signup(name, password)
 
 
 async def add_network(technician_id, client_id, network_name, network_location):
