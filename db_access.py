@@ -17,10 +17,15 @@ def connect_to_db():
     return connection_object
 
 
-def execute_query(sql_query, *args):
+async def execute_query(sql_query, *args):
     db_connection = connect_to_db()
     cursor_object = db_connection.cursor()
-    x = cursor_object.execute(sql_query, args)
+    if args:
+        print(args)
+        print(sql_query)
+        x = cursor_object.execute(sql_query, args[0])
+    else:
+        x = cursor_object.execute(sql_query)
     db_connection.commit()
     return x
 

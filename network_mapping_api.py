@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Form
 
 import server
 
@@ -13,12 +13,12 @@ async def root():
 
 
 @app.get("/login")
-async def login(name, password):
+async def login(name: str = Form(...), password: str = Form(...)):
     return await server.login(name, password)
 
 
 @app.get("/signup")
-async def login(name, password):
+async def login(name: str = Form(...), password: str = Form(...)):
     return await server.signup(name, password)
 
 

@@ -19,8 +19,10 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
-    technician = authenticate_technician(form_data.technician_name, form_data.password)
+# def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
+def login(name, password):
+    response = Response
+    technician = authenticate_technician(name, password)
     if not technician:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -38,9 +40,9 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-def signup(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
-    hash_password = get_password_hash(form_data.password)
-    technician_in_db.add_technician(form_data.technician_name, hash_password)
+async def signup(name, password):
+    hash_password = get_password_hash(password)
+    await technician_in_db.add_technician(name, hash_password)
 
 
 def get_password_hash(password):
@@ -110,9 +112,12 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def get_technician_from_db(technician_name: str):
-    user_dict = db_access.execute_query("SELECT * FROM technical WHERE name=%s", (technician_name))
+async def get_technician_from_db(technician_name: str):
+    user_dict = await db_access.execute_query("SELECT * FROM technical WHERE name=%s LIMIT 1", (technician_name))
+    # print(user_dict[0])
+    # print(user_dict.name)
     if user_dict:
+        print("technical in db", user_dict)
         return TechnicalInDB(**user_dict)
 
 
