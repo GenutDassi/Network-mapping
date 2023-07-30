@@ -11,6 +11,8 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
+import technician_in_db
+
 #TODO change each function that get technician id to get it from get_current_active_technician()!!!
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -36,8 +38,13 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-def signup(name, password):
-    pass
+def signup(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
+    hash_password = get_password_hash(form_data.password)
+    technician_in_db.add_technician(form_data.technician_name, hash_password)
+
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
 
 
 def check_permission(client_id, technician_id):

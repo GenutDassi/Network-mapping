@@ -12,3 +12,4 @@ async def is_authorized(technician_id, client_id):
     if authorized:
         return True
     return False
+
