@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-
-=======
 import pymysql
 
 connection_object = None
@@ -22,38 +19,15 @@ def connect_to_db():
     return connection_object
 
 
-def execute_query(sql_query):
+def execute_query(sql_query, *args):
     db_connection = connect_to_db()
     cursorObject = db_connection.cursor()
-    return cursorObject.execute(sql_query)
+    x = cursorObject.execute(sql_query, args)
+    db_connection.commit()
+    return x
 
 
-    # db_connection = connect_to_db()
-    #
-    # cursorObject = db_connection.cursor()
-    #
-    # # SQL query string
-    #
-    # sqlQuery = "CREATE TABLE Client(id int PRIMARY KEY IDENTITY, LastName varchar(32), FirstName varchar(32))"
-    #
-    # # Execute the sqlQuery
-    #
-    # cursorObject.execute(sqlQuery)
-    #
-    # # SQL query string
-    #
-    # sqlQuery = "show tables"
-    #
-    # # Execute the sqlQuery
-    #
-    # cursorObject.execute(sqlQuery)
-    #
-    # # Fetch all the rows
-    #
-    # rows = cursorObject.fetchall()
-    #
-    # for row in rows:
-    #     print(row)
+
 try:
     connect_to_db()
     # drop_client = "DROP TABLE client"
@@ -78,4 +52,4 @@ except Exception as e:
 finally:
     if connection_object:
         connection_object.close()
->>>>>>> 609b81e9690a0dfc9069416dee8149bfcef58f2d
+
