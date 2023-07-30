@@ -21,11 +21,11 @@ async def add_network(technician_id, client_id, network_name, network_location):
         packets = pcap_files_access.upload_file()
         network_id = network_in_db.create_network((client_id, network_name, network_location))
         devices_dict = {}
-        for line in packets:
-            src_ip = Ether(line.strip())[IP].src
-            src_mac = Ether(line.strip()).src
-            dst_ip = Ether(line.strip())[IP].dst
-            dst_mac = Ether(line.strip()).dst
+        for packet in packets:
+            src_ip = Ether(packet.strip())[IP].src
+            src_mac = Ether(packet.strip()).src
+            dst_ip = Ether(packet.strip())[IP].dst
+            dst_mac = Ether(packet.strip()).dst
             protocol = "XXXX"  # TODO get the protocol - EXTRA
             if src_mac not in devices_dict.keys():
                 devices_dict[src_mac] = await network_in_db.create_device((src_ip, src_mac, network_id))
@@ -44,3 +44,8 @@ async def get_network_information(technician_id, client_id, network_name):
 async def get_connections(technician_id, client_id, network_name):
     if authorization_and_authentication.check_permission(technician_id, client_id):
         return network_in_db.get_connections(client_id, network_name)
+
+
+async def get_devices(technician_id, client_id, network_name):
+    if authorization_and_authentication.check_permission(technician_id, client_id):
+        return network_in_db.get_devices(client_id, network_name)
