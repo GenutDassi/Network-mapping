@@ -9,3 +9,5 @@ def signup(name, password):
 
 def check_permission(client):
     pass
+def check_permission(client, technician_id):
+    pass

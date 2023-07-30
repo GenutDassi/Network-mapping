@@ -36,3 +36,13 @@ async def add_network(client_id, network_name, network_location, path):
             src_id = devices_dict[src_mac]
             dst_id = devices_dict[dst_mac]
             await network_in_db.create_connection((src_id, dst_id, protocol))
+
+
+async def upload_file(client_id, path):
+    if await authorization_and_authentication.check_permission(client_id):
+        return await pcap_files_access.upload_file(path)
+
+
+async def network_information(client_id, network_name):
+    if await authorization_and_authentication.check_permission(client_id):
+        return await network_in_db.get_network_info(client_id, network_name)
