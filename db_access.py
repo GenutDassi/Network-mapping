@@ -13,23 +13,20 @@ def connect_to_db():
         char_set = "utf8mb4"
         cursor_type = pymysql.cursors.DictCursor
         connection_object = pymysql.connect(host=db_server_name, user=db_user, password=db_password,
-
-                                                  db=db_name, charset=char_set, cursorclass=cursor_type)
-
+                                            db=db_name, charset=char_set, cursorclass=cursor_type)
     return connection_object
 
 
 def execute_query(sql_query, *args):
     db_connection = connect_to_db()
-    cursorObject = db_connection.cursor()
-    x = cursorObject.execute(sql_query, args)
+    cursor_object = db_connection.cursor()
+    x = cursor_object.execute(sql_query, args)
     db_connection.commit()
     return x
 
 
-
-try:
-    connect_to_db()
+# try:
+#     connect_to_db()
     # drop_client = "DROP TABLE client"
     # execute_query(drop_client)
     # create_client_table = "CREATE TABLE client(id int AUTO_INCREMENT PRIMARY KEY, LastName varchar(32), FirstName varchar(32))"
@@ -44,12 +41,8 @@ try:
     # execute_query(create_technician_table)
     # create_permission_table = "CREATE TABLE permission(id int AUTO_INCREMENT PRIMARY KEY, client_id int , FOREIGN KEY(client_id) REFERENCES client(id), technician_id int , FOREIGN KEY(technician_id) REFERENCES technician(id))"
     # execute_query(create_permission_table)
-
-except Exception as e:
-
-    print("Exeception occured:{}".format(e))
-
-finally:
-    if connection_object:
-        connection_object.close()
-
+# except Exception as e:
+#     print("Exeception occured:{}".format(e))
+# finally:
+#     if connection_object:
+#         connection_object.close()
