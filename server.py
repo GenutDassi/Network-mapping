@@ -43,4 +43,4 @@ async def get_network_information(technician_id, client_id, network_name):
 
 async def get_connections(technician_id, client_id, network_name):
     if authorization_and_authentication.check_permission(technician_id, client_id):
-        network_in_db.get_connections
+        return network_in_db.get_connections(client_id, network_name)
