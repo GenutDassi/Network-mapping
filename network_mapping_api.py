@@ -22,7 +22,7 @@ async def login(name, password):
     return server.signup(name, password)
 
 
-@app.get("/network/information/{client_id}/network_name")
+@app.get("/network/information/{client_id}/{network_name}")
 async def get_network_information(technician_id: int, client_id: int, network_name: str):
     return server.get_network_information(technician_id, client_id, network_name)
 
