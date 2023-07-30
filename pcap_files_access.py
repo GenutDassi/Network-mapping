@@ -1,5 +1,5 @@
 from tkinter import filedialog
-from scapy.all import rdpcap
+from scapy.all import *
 
 def upload_file():
     file_path = filedialog.askopenfilename(filetypes=[("PCAP files", "*.pcap")])

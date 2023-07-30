@@ -14,7 +14,7 @@ def connect_to_db():
         cursor_type = pymysql.cursors.DictCursor
         connection_object = pymysql.connect(host=db_server_name, user=db_user, password=db_password,
 
-                                                  db=db_name, charset=char_set, cursorclass=cursor_type)
+                                            db=db_name, charset=char_set, cursorclass=cursor_type)
 
     return connection_object
 
@@ -25,7 +25,6 @@ def execute_query(sql_query, *args):
     x = cursorObject.execute(sql_query, args)
     db_connection.commit()
     return x
-
 
 
 try:
@@ -44,6 +43,12 @@ try:
     # execute_query(create_technician_table)
     # create_permission_table = "CREATE TABLE permission(id int AUTO_INCREMENT PRIMARY KEY, client_id int , FOREIGN KEY(client_id) REFERENCES client(id), technician_id int , FOREIGN KEY(technician_id) REFERENCES technician(id))"
     # execute_query(create_permission_table)
+    # alter_device_table = "ALTER TABLE device ADD COLUMN vendor varchar(64)"
+    # execute_query(alter_device_table)
+    # alter_connection_table = "ALTER TABLE connection ADD COLUMN network_id int , FOREIGN KEY (network_id) REFERENCES network(id)"
+    # execute_query(alter_connection_table)
+
+
 
 except Exception as e:
 
@@ -52,4 +57,3 @@ except Exception as e:
 finally:
     if connection_object:
         connection_object.close()
-
