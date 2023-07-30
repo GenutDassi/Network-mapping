@@ -47,11 +47,11 @@ def get_protocol(packet):
 
 
 async def login(name, password):
-    return authorization_and_authentication.login(name, password)
+    return await authorization_and_authentication.login(name, password)
 
 
 async def signup(name, password):
-    return authorization_and_authentication.signup(name, password)
+    return await authorization_and_authentication.signup(name, password)
 
 
 async def add_network(technician_id, client_id, network_name, network_location):
@@ -84,3 +84,8 @@ async def get_network_information(technician_id, client_id, network_name):
 async def get_connections(technician_id, client_id, network_name):
     if authorization_and_authentication.check_permission(technician_id, client_id):
         return network_in_db.get_connections(client_id, network_name)
+
+
+async def get_devices(technician_id, client_id, network_name):
+    if authorization_and_authentication.check_permission(technician_id, client_id):
+        return network_in_db.get_devices(client_id, network_name)
