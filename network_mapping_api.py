@@ -23,13 +23,13 @@ async def login(name, password):
 
 
 @app.get("network_information")
-async def network_information(client_id, network_name):
-    return server.network_information(client_id, network_name)
+async def network_information(technician_id, client_id, network_name):
+    return server.get_network_information(technician_id, client_id, network_name)
 
-
-@app.post("/upload_file")
-async def upload_file(client_id, path):
-    return server.upload_file(client_id, path)
+@app.get("")
+@app.post("/add_network")
+async def add_network(technician_id, client_id, network_name, network_location, path):
+    return server.add_network(technician_id, client_id, network_name, network_location, path)
 
 
 if __name__ == '__main__':
