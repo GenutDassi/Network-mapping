@@ -15,18 +15,18 @@ async def signup(name, password):
     return authorization_and_authentication.signup(name, password)
 
 
-async def add_network(client_id, network_name, network_location, path):
-    technician_id = technician_in_db.get_technician_id()
-    if authorization_and_authentication.check_permission(technician_id, client_id):
-        file = pcap_files_access.upload_file(path)
+async def add_network(technician_id, client_id, network_name, network_location):
+    # technician_id = technician_in_db.get_technician_id()
+    if authorization_and_authentication.check_permission(client_id, technician_id):
+        packets = pcap_files_access.upload_file()
         network_id = network_in_db.create_network((client_id, network_name, network_location))
         devices_dict = {}
-        for line in file:
+        for line in packets:
             src_ip = Ether(line.strip())[IP].src
             src_mac = Ether(line.strip()).src
             dst_ip = Ether(line.strip())[IP].dst
             dst_mac = Ether(line.strip()).dst
-            protocol = "????"  # TODO get the protocol - EXTRA
+            protocol = "XXXX"  # TODO get the protocol - EXTRA
             if src_mac not in devices_dict.keys():
                 devices_dict[src_mac] = await network_in_db.create_device((src_ip, src_mac, network_id))
             if dst_mac not in devices_dict.keys():
@@ -36,6 +36,11 @@ async def add_network(client_id, network_name, network_location, path):
             await network_in_db.create_connection((src_id, dst_id, protocol))
 
 
-async def network_information(client_id, network_name):
-    if authorization_and_authentication.check_permission(client_id):
+async def get_network_information(technician_id, client_id, network_name):
+    if authorization_and_authentication.check_permission(technician_id, client_id):
         return network_in_db.get_network_info(client_id, network_name)
+
+
+async def get_connections(technician_id, client_id, network_name):
+    if authorization_and_authentication.check_permission(technician_id, client_id):
+        return network_in_db.get_connections(client_id, network_name)
