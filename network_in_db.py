@@ -23,8 +23,7 @@ async def create_device(new_device):
 
 
 async def create_connection(new_connection):
-    await db_access.execute_query("INSERT IGNORE INTO connection (src_device_id, dst_device_id, protocol) VALUES (%s);",
-                                  (new_connection))
+    await db_access.execute_query("INSERT IGNORE INTO connection (src_device_id, dst_device_id, protocol) VALUES (%s);",(new_connection))
     new_connection_id = await db_access.execute_query("SELECT @@IDENTITY AS [@@IDENTITY];")
     return new_connection_id
 

@@ -41,8 +41,17 @@ def execute_query(sql_query, *args):
     # execute_query(create_technician_table)
     # create_permission_table = "CREATE TABLE permission(id int AUTO_INCREMENT PRIMARY KEY, client_id int , FOREIGN KEY(client_id) REFERENCES client(id), technician_id int , FOREIGN KEY(technician_id) REFERENCES technician(id))"
     # execute_query(create_permission_table)
+    # alter_device_table = "ALTER TABLE device ADD COLUMN vendor varchar(64)"
+    # execute_query(alter_device_table)
+    # alter_connection_table = "ALTER TABLE connection ADD COLUMN network_id int , FOREIGN KEY (network_id) REFERENCES network(id)"
+    # execute_query(alter_connection_table)
+
+
+
 # except Exception as e:
+#
 #     print("Exeception occured:{}".format(e))
+#
 # finally:
 #     if connection_object:
 #         connection_object.close()
