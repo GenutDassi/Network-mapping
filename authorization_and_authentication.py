@@ -1,29 +1,9 @@
 import db_access
-
-
-def login(name, password):
-    # return token
-    pass
-
-
-def signup(name, password):
-    pass
-
-
-def check_permission(client):
-    pass
-
-
-def check_permission(client, technician_id):
-    pass
-
-
 from datetime import datetime, timedelta
 from typing import Union, Optional, Dict
 
-from fastapi import Depends, FastAPI, HTTPException, status, Request, Response, encoders
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, \
-    OAuth2
+from fastapi import Depends, HTTPException, status, Request, Response, encoders
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, OAuth2
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 
 from fastapi.security.utils import get_authorization_scheme_param
@@ -31,13 +11,58 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-# to get a string like this run:
-# openssl rand -hex 32
+#TODO change each function that get technician id to get it from get_current_active_technician()!!!
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-db = db_access.connect_to_db()
+
+def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
+    technician = authenticate_technician(form_data.technician_name, form_data.password)
+    if not technician:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": technician.name}, expires_delta=access_token_expires
+    )
+    response.set_cookie(
+        key="Authorization", value=f"Bearer {encoders.jsonable_encoder(access_token)}",
+        httponly=True
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+def signup(name, password):
+    pass
+
+
+def check_permission(client_id, technician_id):
+    permission = db_access.execute_query("SELECT * FROM permission WHERE technician_id=%s AND client_id=%s", (technician_id, client_id))
+    if not permission:  #if permission = None - there is no permission
+        return False
+    return True
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: Union[str, None] = None
+
+
+class Technician(BaseModel):
+    name: Union[str, None] = None
+    id: int
+
+
+class TechnicalInDB(Technician):
+    hashed_password: str
 
 
 class OAuth2PasswordBearerWithCookie(OAuth2):
@@ -69,53 +94,28 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         return param
 
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    username: Union[str, None] = None
-
-
-class User(BaseModel):
-    username: str
-    email: Union[str, None] = None
-    full_name: Union[str, None] = None
-    disabled: Union[bool, None] = None
-
-
-class UserInDB(User):
-    hashed_password: str
-
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 oauth2_cookie_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="token")
-app = FastAPI()
 
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
+def get_technician_from_db(technician_name: str):
+    user_dict = db_access.execute_query("SELECT * FROM technical WHERE name=%s", (technician_name))
+    if user_dict:
+        return TechnicalInDB(**user_dict)
 
 
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
-        return UserInDB(**user_dict)
-
-
-def authenticate_user(fake_db, username: str, password: str):
-    user: UserInDB = get_user(fake_db, username)
-    if not user:
+def authenticate_technician(technical_name: str, password: str):
+    technical: TechnicalInDB = get_technician_from_db(technical_name)
+    if not technical:
         return None
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, technical.hashed_password):
         return None
-    return user
+    return technical
 
 
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
@@ -129,7 +129,8 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_cookie_scheme)):
+async def get_current_technician(token: str = Depends(oauth2_cookie_scheme)):
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -137,39 +138,21 @@ async def get_current_user(token: str = Depends(oauth2_cookie_scheme)):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        technician_name: str = payload.get("sub")
+        if technician_name is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
+        token_data = TokenData(username=technician_name)
     except JWTError:
         raise credentials_exception
-    user = get_user(fake_users_db, username=token_data.username)
+    user = get_technician_from_db(technician_name)
     if user is None:
         raise credentials_exception
     return user
 
 
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
+async def get_current_active_technician(current_user: Technician = Depends(get_current_technician)):
     if current_user and current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 
-@app.post("/token", response_model=Token)
-async def login_for_access_token(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-    response.set_cookie(
-        key="Authorization", value=f"Bearer {encoders.jsonable_encoder(access_token)}",
-        httponly=True
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
