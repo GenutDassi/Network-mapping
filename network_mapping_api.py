@@ -1,5 +1,7 @@
 import uvicorn
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, Depends
+from fastapi import Response
+from pydantic import BaseModel
 
 import server
 # from authorization_and_authentication import OAuth2PasswordBearerWithCookie
@@ -13,21 +15,13 @@ async def root():
     return {"message": "hello"}
 
 
-# class Token(BaseModel):
-#     access_token: str
-#     token_type: str
-
-
-# @app.post("/login", response_model=Token)
-# async def login(response=Response, name: str = Form(...), password: str = Form(...)):
-#     return await server.login(response, name, password)
-class TokenResponse(BaseModel):
+class Token(BaseModel):
     access_token: str
     token_type: str
 
 
-@app.post("/login", response_model=TokenResponse)  # Set the response class for the route
-async def login(name: str = Form(...), password: str = Form(...), response: Response = Depends()):
+@app.post("/login", response_model=Token)
+async def login(response: Response, name: str = Form(...), password: str = Form(...)):
     return await server.login(response, name, password)
 
 

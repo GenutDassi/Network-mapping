@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Union, Optional, Dict
 
 from fastapi import Depends, HTTPException, status, Request, Response, encoders
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, OAuth2
+from fastapi.security import OAuth2PasswordBearer, OAuth2
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 
 from fastapi.security.utils import get_authorization_scheme_param
@@ -12,55 +12,12 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 
 import technician_in_db
-from network_mapping_api import TokenResponse
+from network_mapping_api import Token
 
-# TODO change each function that get technician id to get it from get_current_active_technician()!!!
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-
-# def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
-# def login(name, password):
-#     response = Response
-#     technician = authenticate_technician(name, password)
-#     if not technician:
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="Incorrect username or password",
-#             headers={"WWW-Authenticate": "Bearer"},
-#         )
-#     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-#     access_token = create_access_token(
-#         data={"sub": technician.name}, expires_delta=access_token_expires
-#     )
-#     response.set_cookie(
-#         key="Authorization", value=f"Bearer {encoders.jsonable_encoder(access_token)}",
-#         httponly=True
-#     )
-#     return {"access_token": access_token, "token_type": "bearer"}
-#
-#
-# async def signup(name, password):
-#     hash_password = get_password_hash(password)
-#     await technician_in_db.add_technician(name, hash_password)
-#
-#
-# def get_password_hash(password):
-#     return pwd_context.hash(password)
-#
-#
-# def check_permission(client_id, technician_id):
-#     permission = db_access.execute_query("SELECT * FROM permission WHERE technician_id=%s AND client_id=%s", (technician_id, client_id))
-#     if not permission:  #if permission = None - there is no permission
-#         return False
-#     return True
-#
-#
-# class Token(BaseModel):
-#     access_token: str
-#     token_type: str
-#
 
 class TokenData(BaseModel):
     username: Union[str, None] = None
@@ -104,10 +61,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         return param
 
 
-# def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
-async def login(response, name: str = OAuth2PasswordRequestForm, password: str = OAuth2PasswordRequestForm):
-    # response = Response()
-    print(name, password)
+async def login(response: Response, name: str, password: str):
     technician = await authenticate_technician(name, password)
     if not technician:
         raise HTTPException(
@@ -119,17 +73,12 @@ async def login(response, name: str = OAuth2PasswordRequestForm, password: str =
     access_token = create_access_token(
         data={"sub": technician.name}, expires_delta=access_token_expires
     )
-    # response = Response()
-    print("#######################################")
-    print(response)
-    # print(response)
     response.set_cookie(
         key="Authorization",
-        # value=f"Bearer {encoders.jsonable_encoder(access_token)}",
-        value="1234",
-        # httponly=True
+        value=f"Bearer {encoders.jsonable_encoder(access_token)}",
+        httponly=True
     )
-    return TokenResponse(access_token=access_token, token_type="bearer")
+    return Token(access_token=access_token, token_type="bearer")
 
 
 async def signup(name, password):
@@ -165,7 +114,7 @@ async def get_technician_from_db(technician_name: str):
     print(user_dict)
     if user_dict:
         print("technical in db", user_dict)
-        return TechnicalInDB(**user_dict)
+        return TechnicalInDB(**user_dict[0])
 
 
 async def authenticate_technician(technical_name: str, password: str):
