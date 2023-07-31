@@ -1,7 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, Form, Depends
-from fastapi.openapi.models import Response
-from pydantic import BaseModel
+from fastapi import FastAPI, Form
 
 import server
 # from authorization_and_authentication import OAuth2PasswordBearerWithCookie

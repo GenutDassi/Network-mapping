@@ -1,6 +1,6 @@
 import db_access
 from datetime import datetime, timedelta
-from typing import Union, Optional, Dict, Type
+from typing import Union, Optional, Dict
 
 from fastapi import Depends, HTTPException, status, Request, Response, encoders
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, OAuth2
@@ -20,6 +20,47 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
+# def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
+# def login(name, password):
+#     response = Response
+#     technician = authenticate_technician(name, password)
+#     if not technician:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Incorrect username or password",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
+#     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+#     access_token = create_access_token(
+#         data={"sub": technician.name}, expires_delta=access_token_expires
+#     )
+#     response.set_cookie(
+#         key="Authorization", value=f"Bearer {encoders.jsonable_encoder(access_token)}",
+#         httponly=True
+#     )
+#     return {"access_token": access_token, "token_type": "bearer"}
+#
+#
+# async def signup(name, password):
+#     hash_password = get_password_hash(password)
+#     await technician_in_db.add_technician(name, hash_password)
+#
+#
+# def get_password_hash(password):
+#     return pwd_context.hash(password)
+#
+#
+# def check_permission(client_id, technician_id):
+#     permission = db_access.execute_query("SELECT * FROM permission WHERE technician_id=%s AND client_id=%s", (technician_id, client_id))
+#     if not permission:  #if permission = None - there is no permission
+#         return False
+#     return True
+#
+#
+# class Token(BaseModel):
+#     access_token: str
+#     token_type: str
+#
 
 class TokenData(BaseModel):
     username: Union[str, None] = None
@@ -123,7 +164,8 @@ async def get_technician_from_db(technician_name: str):
     print("------------------")
     print(user_dict)
     if user_dict:
-        return TechnicalInDB(**user_dict[0])
+        print("technical in db", user_dict)
+        return TechnicalInDB(**user_dict)
 
 
 async def authenticate_technician(technical_name: str, password: str):
@@ -147,6 +189,7 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
 
 
 async def get_current_technician(token: str = Depends(oauth2_cookie_scheme)):
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -160,7 +203,7 @@ async def get_current_technician(token: str = Depends(oauth2_cookie_scheme)):
         token_data = TokenData(username=technician_name)
     except JWTError:
         raise credentials_exception
-    user = get_technician_from_db(technician_name=token_data.username)
+    user = get_technician_from_db(technician_name)
     if user is None:
         raise credentials_exception
     return user
@@ -170,3 +213,5 @@ async def get_current_active_technician(current_user: Technician = Depends(get_c
     if current_user and current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+
