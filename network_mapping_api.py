@@ -1,7 +1,10 @@
+from typing import Union, Dict
+
 import uvicorn
-from fastapi import FastAPI, Form, Depends
+from fastapi import FastAPI, Form, Depends, HTTPException
 from fastapi import Response
 from pydantic import BaseModel
+from requests import Request
 
 import server
 # from authorization_and_authentication import OAuth2PasswordBearerWithCookie
@@ -19,9 +22,9 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-
 @app.post("/login", response_model=Token)
-async def login(response: Response, name: str = Form(...), password: str = Form(...)):
+async def login(request: Request, response: Response, name: str = Form(...), password: str = Form(...)):
+    # cookies = dict(request.cookies)
     return await server.login(response, name, password)
 
 
@@ -45,9 +48,9 @@ async def get_network_devices(client_id: int, network_name: str):
     return await server.get_devices(client_id, network_name)
 
 
-@app.post("/network/add_network/{client_id}")
-async def add_network(client_id: int, network_name: str, network_location: str):
-    return await server.add_network(client_id, network_name, network_location)
+@app.post("/network/add_network", )
+async def add_network(request: Request(), client_id: int, network_name: str = Form(...), network_location: str = Form(...)):
+    return await server.add_network(request, client_id, network_name, network_location)
 
 
 if __name__ == '__main__':

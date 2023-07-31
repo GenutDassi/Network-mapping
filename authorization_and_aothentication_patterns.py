@@ -24,7 +24,7 @@ class TechnicalInDB(Technician):
 class OAuth2PasswordBearerWithCookie(OAuth2):
     def __init__(
             self,
-            tokenUrl: str,
+            tokenUrl: str = '/',
             scheme_name: Optional[str] = None,
             scopes: Optional[Dict[str, str]] = None,
             auto_error: bool = True,

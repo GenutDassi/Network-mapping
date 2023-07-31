@@ -2,7 +2,7 @@ import db_access
 
 
 async def create_network(new_network):
-    await db_access.execute_query("INSERT IGNORE INTO network (client_id, name, location) VALUES (%s);", new_network)
+    await db_access.execute_query("INSERT IGNORE INTO network (client_id, name, location) VALUES (%s, %s, %s);", new_network)
     new_network_id = await db_access.execute_query("SELECT @@IDENTITY AS [@@IDENTITY];")
     return new_network_id
 

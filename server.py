@@ -1,6 +1,9 @@
+from fastapi import HTTPException
+
 import network_in_db
 import pcap_files_access
 import authorization_and_authentication
+import technician_in_db
 
 
 async def login(response, name, password):
@@ -11,11 +14,12 @@ async def signup(name, password):
     return await authorization_and_authentication.signup(name, password)
 
 
-async def add_network(client_id, network_name, network_location):
-    technician_id = authorization_and_authentication.get_current_technician()
-    if authorization_and_authentication.check_permission(client_id, technician_id):
+# TODO: break this module!!
+async def add_network(request, client_id, network_name, network_location):
+    technician_id = await technician_in_db.get_current_technician()
+    if await authorization_and_authentication.check_permission(client_id, technician_id):
         packets = pcap_files_access.upload_file()
-        network_id = network_in_db.create_network((client_id, network_name, network_location))
+        network_id = await network_in_db.create_network((client_id, network_name, network_location))
         devices_dict = {}
         for packet in packets:
             src_mac, dst_mac = pcap_files_access.get_src_and_dst_mac_address(packet)
@@ -31,6 +35,8 @@ async def add_network(client_id, network_name, network_location):
             src_id = devices_dict[src_mac]
             dst_id = devices_dict[dst_mac]
             await network_in_db.create_connection((src_id, dst_id, protocol))
+        return network_id
+    return "error!!!!!!!!!!!!!!!!!!"
 
 
 async def get_network_information(technician_id, client_id, network_name):

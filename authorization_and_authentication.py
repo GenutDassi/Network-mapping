@@ -1,8 +1,10 @@
+from urllib import request
+
 import db_access
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Union, List
 
-from fastapi import Depends, HTTPException, status, Request, Response, encoders
+from fastapi import Depends, HTTPException, status, Request, Response, encoders, Header
 from fastapi.security import OAuth2PasswordBearer, OAuth2
 
 from jose import JWTError, jwt
@@ -47,9 +49,9 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def check_permission(client_id, technician_id):
-    permission = db_access.execute_query("SELECT * FROM permission WHERE technician_id=%s AND client_id=%s",
-                                         (technician_id, client_id))
+async def check_permission(client_id, technician_id):
+    permission = await db_access.execute_query("SELECT * FROM permission WHERE technician_id=%s AND client_id=%s",
+                                               (technician_id, client_id))
     if not permission:  # if permission = None - there is no permission
         return False
     return True
@@ -90,8 +92,12 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     return encoded_jwt
 
 
-async def get_current_technician(token: str = Depends(oauth2_cookie_scheme)):
-
+# async def get_current_technician(token: str = Depends(oauth2_cookie_scheme)):
+async def get_current_technician_name():
+    cookies = await get_cookies()
+    print("------------------------------------------")
+    print(cookies["Authorization"])
+    token = cookies["Authorization"]
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -100,20 +106,26 @@ async def get_current_technician(token: str = Depends(oauth2_cookie_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         technician_name: str = payload.get("sub")
+        print("**********************")
+        print("technician_name-info from cookie:", technician_name)
         if technician_name is None:
             raise credentials_exception
         token_data = TokenData(username=technician_name)
+        print("token data", token_data)
     except JWTError:
         raise credentials_exception
-    user = get_technician_from_db(technician_name)
-    if user is None:
+    technician = get_technician_from_db(technician_name)
+    if technician is None:
         raise credentials_exception
-    return user
+    return technician
 
 
+async def get_cookies() -> dict:
+    pass
+
+
+# TODO: complete this function!!!!!!!!!!!!
 async def get_current_active_technician(current_user: Technician = Depends(get_current_technician)):
     if current_user and current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
-
-
