@@ -23,7 +23,8 @@ async def create_device(new_device):
 
 
 async def create_connection(new_connection):
-    await db_access.execute_query("INSERT IGNORE INTO connection (src_device_id, dst_device_id, protocol) VALUES (%s);",(new_connection))
+    await db_access.execute_query("INSERT IGNORE INTO connection (src_device_id, dst_device_id, protocol) VALUES (%s);",
+                                  (new_connection))
     new_connection_id = await db_access.execute_query("SELECT @@IDENTITY AS [@@IDENTITY];")
     return new_connection_id
 
@@ -35,15 +36,18 @@ async def get_devices(client_id, network_name):
         "SELECT device.mac, device.ip, device.vendor FROM device WHERE network_id=%s;", (network_id))
 
 
-# async def get_connections(client_id, network_name):
-#     network_id = await db_access.execute_query("SELECT network.id FROM network WHERE client_id=%s AND network_name=%s;",
-#                                                (client_id, network_name))
-#     return await db_access.execute_query(
-#         "SELECT device.mac, device.id, device.protocol FROM connection WHERE network_id=%s;", (network_id))
-#
-# "select * FROM connection INNER JOIN device ON connection.src_device_id=device.id INNER JOIN device ON connection.dst_device_id=device.id"
-# "select * FROM (select * FROM connection INNER JOIN device ON connection.src_device_id=device.id) WHERE device.network_id=%s"#,network_id
-# "select * FROM (select * FROM connection INNER JOIN device ON connection.dst_device_id=device.id) WHERE device.network_id=%s"#,network_id"
+# async def get_connections(client_id, network_name): network_id = await db_access.execute_query("SELECT network.id
+# FROM network WHERE client_id=%s AND network_name=%s;", (client_id, network_name)) return await
+# db_access.execute_query( "SELECT device.mac, device.id, device.protocol FROM connection WHERE network_id=%s;",
+# (network_id))
+async def get_full_network(client_id, network_name):
+    network_id = await db_access.execute_query("SELECT network.id FROM network WHERE client_id=%s AND network_name=%s;",
+                                               (client_id, network_name))
+    query = "SELECT * FROM connection INNER JOIN device AS src_device ON connection.src_device_id = src_device.id " \
+            "INNER JOIN device AS dst_device ON connection.dst_device_id = dst_device.id WHERE src_device.network_id " \
+            "= %s AND dst_device.network_id =%s;"
+    return await db_access.execute_query(query, network_id)
+
 
 # TODO join????
 
