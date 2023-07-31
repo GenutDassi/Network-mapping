@@ -1,5 +1,8 @@
 from tkinter import filedialog
+
+from mac_vendor_lookup import MacLookup
 from scapy.all import *
+from scapy.layers.inet import IP
 
 
 def upload_file():
@@ -10,5 +13,39 @@ def upload_file():
     return None
 
 
-def read_file(path):
-    pass
+def get_src_and_dst_ip_address(packet):
+    packet_ip = packet.getlayer(IP)
+    if packet_ip:
+        src_ip = packet_ip.src
+        dst_ip = packet_ip.dst
+        return src_ip, dst_ip
+
+
+def get_src_and_dst_mac_address(packet):
+    src_mac = packet["Ether"].src
+    dst_mac = packet["Ether"].dst
+    return src_mac, dst_mac
+
+
+def get_vendor_from_mac(mac_address):
+    try:
+        vendor = MacLookup().lookup(mac_address)
+        return vendor
+    except Exception as e:
+        # print("Error:", e)
+        # return None
+        pass
+
+
+def get_protocol(packet):
+    if 'TCP' in packet:
+        protocol = packet['TCP'].name
+    elif 'UDP' in packet:
+        protocol = packet['UDP'].name
+    elif 'ARP' in packet:
+        protocol = packet['ARP'].name
+    elif 'ICMP' in packet:
+        protocol = packet['ICMP'].name
+    else:
+        protocol = 'Unknown'
+    return protocol

@@ -1,7 +1,10 @@
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Form, Depends
+from fastapi.openapi.models import Response
+from pydantic import BaseModel
 
 import server
+# from authorization_and_authentication import OAuth2PasswordBearerWithCookie
 
 app = FastAPI()
 
@@ -12,34 +15,47 @@ async def root():
     return {"message": "hello"}
 
 
-@app.get("/login")
-async def login(name, password):
-    return await server.login(name, password)
+# class Token(BaseModel):
+#     access_token: str
+#     token_type: str
 
 
-@app.get("/signup")
-async def login(name, password):
+# @app.post("/login", response_model=Token)
+# async def login(response=Response, name: str = Form(...), password: str = Form(...)):
+#     return await server.login(response, name, password)
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+
+
+@app.post("/login", response_model=TokenResponse)  # Set the response class for the route
+async def login(name: str = Form(...), password: str = Form(...), response: Response = Depends()):
+    return await server.login(response, name, password)
+
+
+@app.post("/signup")
+async def signup(name: str = Form(...), password: str = Form(...)):
     return await server.signup(name, password)
 
 
 @app.get("/network/information/{client_id}/{network_name}")
-async def get_network_information(technician_id: int, client_id: int, network_name: str):
-    return await server.get_network_information(technician_id, client_id, network_name)
+async def get_network_information(client_id: int, network_name: str):
+    return await server.get_network_information(client_id, network_name)
 
 
 @app.get("/network/connections/{client_id}/{network_name}")
-async def get_network_connections(technician_id: int, client_id: int, network_name: str):
-    return await server.get_connections(technician_id, client_id, network_name)
+async def get_network_connections(client_id: int, network_name: str):
+    return await server.get_connections(client_id, network_name)
 
 
 @app.get("/network/devices/{client_id}/{network_name}")
-async def get_network_devices(technician_id: int, client_id: int, network_name: str):
-    return await server.get_devices(technician_id, client_id, network_name)
+async def get_network_devices(client_id: int, network_name: str):
+    return await server.get_devices(client_id, network_name)
 
 
 @app.post("/network/add_network/{client_id}")
-async def add_network(technician_id: int, client_id: int, network_name: str, network_location: str):
-    return await server.add_network(technician_id, client_id, network_name, network_location)
+async def add_network(client_id: int, network_name: str, network_location: str):
+    return await server.add_network(client_id, network_name, network_location)
 
 
 if __name__ == '__main__':

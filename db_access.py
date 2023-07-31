@@ -3,7 +3,7 @@ import pymysql
 connection_object = None
 
 
-def connect_to_db():
+async def connect_to_db():
     global connection_object
     if not connection_object:
         db_server_name = "sql7.freesqldatabase.com"
@@ -17,14 +17,24 @@ def connect_to_db():
     return connection_object
 
 
-def execute_query(sql_query, *args):
-    db_connection = connect_to_db()
+async def execute_query(sql_query, *args):
+    db_connection = await connect_to_db()
     cursor_object = db_connection.cursor()
-    x = cursor_object.execute(sql_query, args)
+    if args:
+        print(args)
+        print(sql_query)
+        x = cursor_object.execute(sql_query, args[0])
+    else:
+        x = cursor_object.execute(sql_query)
+    if sql_query.strip().lower().startswith('select'):
+        return cursor_object.fetchall()
     db_connection.commit()
     return x
 
-
+# async def itry():
+#     result = await execute_query("SELECT * FROM technician WHERE technician.name = %s", 'Yosi')
+#     print(result)
+# itry()
 # try:
 #     connect_to_db()
     # drop_client = "DROP TABLE client"
