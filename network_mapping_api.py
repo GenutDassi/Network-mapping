@@ -1,4 +1,10 @@
+from typing import Union, Dict
+
 import uvicorn
+from fastapi import FastAPI, Form, Depends, HTTPException
+from fastapi import Response
+from pydantic import BaseModel
+from requests import Request
 from fastapi import FastAPI, Form, UploadFile, File, Depends
 from fastapi.openapi.models import Response
 from pydantic import BaseModel
@@ -15,21 +21,13 @@ async def root():
     return {"message": "hello"}
 
 
-# class Token(BaseModel):
-#     access_token: str
-#     token_type: str
-
-
-# @app.post("/login", response_model=Token)
-# async def login(response=Response, name: str = Form(...), password: str = Form(...)):
-#     return await server.login(response, name, password)
-class TokenResponse(BaseModel):
+class Token(BaseModel):
     access_token: str
     token_type: str
 
-
-@app.post("/login", response_model=TokenResponse)  # Set the response class for the route
-async def login(name: str = Form(...), password: str = Form(...), response: Response = Depends()):
+@app.post("/login", response_model=Token)
+async def login(request: Request, response: Response, name: str = Form(...), password: str = Form(...)):
+    # cookies = dict(request.cookies)
     return await server.login(response, name, password)
 
 
