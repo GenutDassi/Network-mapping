@@ -1,5 +1,3 @@
-from fastapi import HTTPException
-
 import network_in_db
 import pcap_files_access
 import authorization_and_authentication
@@ -15,12 +13,13 @@ async def signup(name, password):
 
 
 # TODO: break this module!!
-async def add_network(request, client_id, network_name, network_location):
+async def add_network(client_id, network_name, network_location, file_content):
     technician_id = await technician_in_db.get_current_technician()
     if await authorization_and_authentication.check_permission(client_id, technician_id):
-        packets = pcap_files_access.upload_file()
+        packets = pcap_files_access.read_pcap_file(file_content)
         network_id = await network_in_db.create_network((client_id, network_name, network_location))
-        devices_dict = {}
+        devices_dict = {}   #the dictionary looks like : {(src_mac, dst_mac):{"id": 3, "protocols": "TCP, UDP"}}
+        connections_dict = {}
         for packet in packets:
             src_mac, dst_mac = pcap_files_access.get_src_and_dst_mac_address(packet)
             if pcap_files_access.get_src_and_dst_ip_address(packet):
@@ -29,13 +28,18 @@ async def add_network(request, client_id, network_name, network_location):
             dst_vendor = pcap_files_access.get_vendor_from_mac(dst_mac)
             protocol = pcap_files_access.get_protocol(packet)
             if src_mac not in devices_dict.keys():
-                devices_dict[src_mac] = await network_in_db.create_device((src_ip, src_mac, network_id, src_vendor))
+                devices_dict[src_mac] = await network_in_db.create_device(src_ip, src_mac, network_id, src_vendor)
             if dst_mac not in devices_dict.keys():
-                devices_dict[dst_mac] = await network_in_db.create_device((dst_ip, dst_mac, network_id, dst_vendor))
-            src_id = devices_dict[src_mac]
-            dst_id = devices_dict[dst_mac]
-            await network_in_db.create_connection((src_id, dst_id, protocol))
-        return network_id
+                devices_dict[dst_mac] = await network_in_db.create_device(dst_ip, dst_mac, network_id, dst_vendor)
+            src_id = devices_dict[src_mac][0]['last_id']
+            dst_id = devices_dict[dst_mac][0]['last_id']
+            print("id od src & dst", src_id, src_mac)
+            if (src_mac, dst_mac) not in connections_dict.keys():
+                connections_dict[(src_mac, dst_mac)] = {"connection_id": await network_in_db.create_connection(src_id, dst_id, protocol), "protocols": protocol}
+            elif protocol not in connections_dict[(src_mac, dst_mac)]["protocols"]:
+                await network_in_db.add_protocol_to_connection(connections_dict[(src_mac, dst_mac)]["connection_id"], protocol)
+                connections_dict[(src_mac, dst_mac)]["protocols"] += f", {protocol}"
+        return "success!!!", network_id
     return "error!!!!!!!!!!!!!!!!!!"
 
 

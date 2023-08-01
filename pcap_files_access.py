@@ -1,8 +1,8 @@
 from tkinter import filedialog
-
 from mac_vendor_lookup import MacLookup
 from scapy.all import *
 from scapy.layers.inet import IP
+from scapy.libs.six import BytesIO
 
 
 def upload_file():
@@ -11,6 +11,12 @@ def upload_file():
         file = rdpcap(file_path)
         return file
     return None
+
+
+def read_pcap_file(pcap_file_content):
+    pcap_file = BytesIO(pcap_file_content)
+    packets = rdpcap(pcap_file)
+    return packets
 
 
 def get_src_and_dst_ip_address(packet):

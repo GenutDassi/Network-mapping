@@ -5,6 +5,9 @@ from fastapi import FastAPI, Form, Depends, HTTPException
 from fastapi import Response
 from pydantic import BaseModel
 from requests import Request
+from fastapi import FastAPI, Form, UploadFile, File, Depends
+from fastapi.openapi.models import Response
+from pydantic import BaseModel
 
 import server
 
@@ -19,14 +22,13 @@ async def root():
     return {"message": "hello"}
 
 
-class Token(BaseModel):
+class MyToken(BaseModel):
     access_token: str
     token_type: str
 
 
-@app.post("/login", response_model=Token)
-async def login(request: Request, response: Response, name: str = Form(...), password: str = Form(...)):
-    # cookies = dict(request.cookies)
+@app.post("/login", response_model=MyToken)
+async def login(response: Response, name: str = Form(...), password: str = Form(...)):
     return await server.login(response, name, password)
 
 
@@ -58,10 +60,10 @@ async def get_network_devices(client_id: int, network_name: str):
     return await server.get_devices(client_id, network_name)
 
 
-@app.post("/network/add_network", )
-async def add_network(request: Request(), client_id: int, network_name: str = Form(...),
-                      network_location: str = Form(...)):
-    return await server.add_network(request, client_id, network_name, network_location)
+@app.post("/network/add_network")
+async def add_network(client_id: int, network_name: str = Form(...), network_location: str = Form(...),  file: UploadFile = File(...)):
+    file_content = await file.read()
+    return await server.add_network(client_id, network_name, network_location, file_content)
 
 
 if __name__ == '__main__':
