@@ -5,7 +5,7 @@ from pcap_files import pcap_files_access
 
 # TODO: break this module!!
 async def add_network(client_id, network_name, network_location, file_content):
-    technician_id = await technician_CRUD.get_current_technician()
+    technician_id = await technician_CRUD.get_current_technician_id()
     if await authorization_and_authentication.check_permission(client_id, technician_id):
         packets = pcap_files_access.read_pcap_file(file_content)
         network_id = await network_CRUD.create_network(client_id, network_name, network_location)
@@ -24,12 +24,13 @@ async def add_network(client_id, network_name, network_location, file_content):
                 devices_dict[dst_mac] = await device_CRUD.create_device(dst_ip, dst_mac, network_id, dst_vendor)
             src_id = devices_dict[src_mac][0]['last_id']
             dst_id = devices_dict[dst_mac][0]['last_id']
-            print("id od src & dst", src_id, src_mac)
-            if (src_mac, dst_mac) not in connections_dict.keys():
+            print("id of src & dst", src_id, "---", src_mac)
+            if (src_mac, dst_mac) not in connections_dict.keys():  # this connection is not in the db
                 connections_dict[(src_mac, dst_mac)] = {
                     "connection_id": await connections_CRUD.create_connection(src_id, dst_id, protocol),
                     "protocols": protocol}
             elif protocol not in connections_dict[(src_mac, dst_mac)]["protocols"]:
+                # if the connection is in the db but with other protocol
                 await connections_CRUD.add_protocol_to_connection(
                     connections_dict[(src_mac, dst_mac)]["connection_id"],
                     protocol)
@@ -38,6 +39,7 @@ async def add_network(client_id, network_name, network_location, file_content):
     return "error!!!!!!!!!!!!!!!!!!"
 
 
-async def get_network_information(technician_id, client_id, network_name):
+async def get_network_information(client_id, network_name):
+    technician_id = await technician_CRUD.get_current_technician_id()
     if authorization_and_authentication.check_permission(technician_id, client_id):
-        return network_CRUD.get_network_info(client_id, network_name)
+        return await network_CRUD.get_network_info(client_id, network_name)
