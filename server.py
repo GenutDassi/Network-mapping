@@ -45,12 +45,26 @@ async def get_network_information(technician_id, client_id, network_name):
 
 
 async def get_connections(client_id, network_name):
-    technician_id = authorization_and_authentication.get_current_technician()
+    technician_id = await technician_in_db.get_current_technician()
+    # technician_id = authorization_and_authentication.get_current_technician()
     if authorization_and_authentication.check_permission(technician_id, client_id):
-        return network_in_db.get_full_network(client_id, network_name)
+        return await network_in_db.get_full_network(client_id, network_name)
 
 
 async def get_devices(client_id, network_name):
-    technician_id = authorization_and_authentication.get_current_technician()
+    technician_id = await technician_in_db.get_current_technician()
+    # technician_id = authorization_and_authentication.get_current_technician()
     if authorization_and_authentication.check_permission(technician_id, client_id):
-        return network_in_db.get_devices(client_id, network_name)
+        return await network_in_db.get_devices(client_id, network_name)
+
+
+async def get_devices_by_vendor(client_id, network_name, vendor_name):
+    technician_id = await technician_in_db.get_current_technician()
+    if authorization_and_authentication.check_permission(technician_id, client_id):
+        return await network_in_db.get_devices_by_vendor(client_id, network_name, vendor_name)
+
+
+async def get_devices_by_mac_address(client_id, network_name, mac_address):
+    technician_id = await technician_in_db.get_current_technician()
+    if authorization_and_authentication.check_permission(technician_id, client_id):
+        return await network_in_db.get_devices_by_mac_address(client_id, network_name, mac_address)
