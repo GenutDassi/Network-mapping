@@ -20,7 +20,7 @@ async def get_devices_by_vendor(client_id, network_name, vendor_name):
                                                (client_id, network_name))
     return await db_access.execute_query(
         "SELECT device.mac, device.ip, device.vendor FROM device WHERE network_id=%s AND vendor = %s;",
-        (network_id, vendor_name))
+        (network_id[0]['id'], vendor_name))
 
 
 async def get_devices_by_mac_address(client_id, network_name, mac_address):
@@ -28,4 +28,4 @@ async def get_devices_by_mac_address(client_id, network_name, mac_address):
                                                (client_id, network_name))
     return await db_access.execute_query(
         "SELECT device.mac, device.ip, device.vendor FROM device WHERE network_id=%s AND mac=%s;",
-        (network_id, mac_address))
+        (network_id[0]['id'], mac_address))

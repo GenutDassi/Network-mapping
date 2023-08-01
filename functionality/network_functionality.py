@@ -17,8 +17,8 @@ async def add_network(technician_id, client_id, network_name, network_location, 
             src_mac, dst_mac = pcap_files_access.get_src_and_dst_mac_address(packet)
             if pcap_files_access.get_src_and_dst_ip_address(packet):
                 src_ip, dst_ip = pcap_files_access.get_src_and_dst_ip_address(packet)
-            src_vendor = pcap_files_access.get_vendor_from_mac(src_mac)
-            dst_vendor = pcap_files_access.get_vendor_from_mac(dst_mac)
+            src_vendor = await pcap_files_access.get_vendor_from_mac(src_mac)
+            dst_vendor = await pcap_files_access.get_vendor_from_mac(dst_mac)
             protocol = pcap_files_access.get_protocol(packet)
             if src_mac not in devices_dict.keys():
                 devices_dict[src_mac] = await device_CRUD.create_device(src_ip, src_mac, network_id, src_vendor)
