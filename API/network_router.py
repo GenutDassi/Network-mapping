@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Form, UploadFile, File
+from fastapi import APIRouter, Form, UploadFile, File, Depends
 
-from functionality import network_functionality, connection_functionality, devices_functionality
+from authorization_and_authentication.authorization_and_authentication import get_current_active_technician
+from authorization_and_authentication.authorization_and_authentication_patterns import Technician
+from functionality import network_functionality, devices_functionality
 
 router = APIRouter()
 
@@ -11,14 +13,14 @@ async def root():
     return {"message": "Hi , I'm running"}
 
 
-@router.get("/network/get-information")
+@router.get("/network/get-network_info")
 async def get_network_information(client_id: int, network_name: str, current_technician: Technician = Depends(get_current_active_technician)):
     return await network_functionality.get_network_information(current_technician, client_id, network_name)
 
 
 @router.get("/network/get-connections")
-async def get_network_information(client_id: int, network_name: str, current_technician: Technician = Depends(get_current_active_technician)):
-    return await network_functionality.get_network_information(current_technician, client_id, network_name)
+async def get_network_connections(client_id: int, network_name: str, current_technician: Technician = Depends(get_current_active_technician)):
+    return await network_functionality.get_network_connections(current_technician, client_id, network_name)
 
 
 @router.get("/network/get-devices-by-prop")

@@ -25,6 +25,8 @@ def get_src_and_dst_ip_address(packet):
         src_ip = packet_ip.src
         dst_ip = packet_ip.dst
         return src_ip, dst_ip
+    else:
+        return None, None
 
 
 def get_src_and_dst_mac_address(packet):

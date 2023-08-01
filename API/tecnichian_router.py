@@ -1,7 +1,6 @@
 from API.network_router import router
-from fastapi import Response, Form, Depends
+from fastapi import Response, Form
 
-from authorization_and_authentication.authorization_and_authentication import get_current_active_technician
 from authorization_and_authentication.authorization_and_authentication_patterns import MyToken, Technician
 from functionality import tecnichian_functionality
 
