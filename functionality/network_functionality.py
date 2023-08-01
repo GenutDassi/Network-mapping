@@ -1,12 +1,14 @@
+from fastapi import Depends
+
 from CRUD import technician_CRUD, network_CRUD, device_CRUD, connections_CRUD
 from authorization_and_authentication import authorization_and_authentication
 from pcap_files import pcap_files_access
 
 
 # TODO: break this module!!
-async def add_network(client_id, network_name, network_location, file_content):
-    technician_id = await technician_CRUD.get_current_technician_id()
-    if await authorization_and_authentication.check_permission(client_id, technician_id):
+async def add_network(technician_id, client_id, network_name, network_location, file_content):
+    # technician_id = await technician_CRUD.get_current_technician_id()
+    if await authorization_and_authentication.check_permission(technician_id, client_id):
         packets = pcap_files_access.read_pcap_file(file_content)
         network_id = await network_CRUD.create_network(client_id, network_name, network_location)
         devices_dict = {}  # the dictionary looks like : {(src_mac, dst_mac):{"id": 3, "protocols": "TCP, UDP"}}
@@ -39,7 +41,7 @@ async def add_network(client_id, network_name, network_location, file_content):
     return "error!!!!!!!!!!!!!!!!!!"
 
 
-async def get_network_information(client_id, network_name):
-    technician_id = await technician_CRUD.get_current_technician_id()
+async def get_network_information(technician_id, client_id, network_name):
+    # technician_id = await technician_CRUD.get_current_technician_id()
     if authorization_and_authentication.check_permission(technician_id, client_id):
         return await network_CRUD.get_network_info(client_id, network_name)

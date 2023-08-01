@@ -7,16 +7,10 @@ async def create_network(client_id, name, location):
     print("id", new_network_id)
     new_network_id = new_network_id[0]["LAST_INSERT_ID()"]
     print("id", new_network_id)
-    # last_inserted_id = cursor.fetchone()['last_id']
-    # new_network_id = await db_access.execute_query("SELECT @@IDENTITY AS [@@IDENTITY];")
     return new_network_id
 
 
 async def get_network_info(client_id, network_name):
-    # query = "SELECT network.*, client.name FROM ("
-    # "SELECT * FROM network INNER JOIN clients ON "
-    # "network.client_id=client.id) "
-    # "WHERE network.client_id=%s AND network.name=%s;"
     print((client_id, network_name))
     query = "SELECT network.name, network.location, client.FirstName, client.LastName FROM network INNER JOIN client " \
             "WHERE network.client_id = client.id AND network.name = %s AND client.id = %s;"
@@ -31,7 +25,6 @@ async def get_full_network(client_id, network_name):
             "FROM connection INNER JOIN device AS src_device ON connection.src_device_id = src_device.id INNER JOIN " \
             "device AS dst_device ON connection.dst_device_id = dst_device.id WHERE src_device.network_id = %s AND " \
             "dst_device.network_id = %s;"
-    print("/////////////////////////////////////")
     network_id = network_id[0]["id"]
     print(network_id, network_id)
     return await db_access.execute_query(query, (network_id, network_id))
