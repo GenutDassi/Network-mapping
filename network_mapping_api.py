@@ -1,5 +1,7 @@
 import uvicorn
-from fastapi import FastAPI, Form
+from fastapi import FastAPI, Form, UploadFile, File, Depends
+from fastapi.openapi.models import Response
+from pydantic import BaseModel
 
 import server
 # from authorization_and_authentication import OAuth2PasswordBearerWithCookie
@@ -51,9 +53,10 @@ async def get_network_devices(client_id: int, network_name: str):
     return await server.get_devices(client_id, network_name)
 
 
-@app.post("/network/add_network/{client_id}")
-async def add_network(client_id: int, network_name: str, network_location: str):
-    return await server.add_network(client_id, network_name, network_location)
+@app.post("/network/add_network")
+async def add_network(client_id: int, network_name: str = Form(...), network_location: str = Form(...),  file: UploadFile = File(...)):
+    file_content = await file.read()
+    return await server.add_network(client_id, network_name, network_location, file_content)
 
 
 if __name__ == '__main__':

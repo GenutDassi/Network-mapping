@@ -11,10 +11,12 @@ async def signup(name, password):
     return await authorization_and_authentication.signup(name, password)
 
 
-async def add_network(client_id, network_name, network_location):
+# TODO before we insert packet we have to check if the src and dst is not exist in the db
+async def add_network(client_id, network_name, network_location, file_content):
     technician_id = authorization_and_authentication.get_current_technician()
     if authorization_and_authentication.check_permission(client_id, technician_id):
-        packets = pcap_files_access.upload_file()
+        # packets = pcap_files_access.upload_file()
+        packets = pcap_files_access.read_pcap_file(file_content)
         network_id = network_in_db.create_network((client_id, network_name, network_location))
         devices_dict = {}
         for packet in packets:
