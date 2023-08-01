@@ -10,6 +10,7 @@ from fastapi.openapi.models import Response
 from pydantic import BaseModel
 
 import server
+
 # from authorization_and_authentication import OAuth2PasswordBearerWithCookie
 
 app = FastAPI()
@@ -44,6 +45,14 @@ async def get_network_information(client_id: int, network_name: str):
 @app.get("/network/connections/{client_id}/{network_name}")
 async def get_network_connections(client_id: int, network_name: str):
     return await server.get_connections(client_id, network_name)
+
+
+@app.get("/network/devices-by-vendor/{client_id}/{network_name}/{mapping_by}/{value_mapping}")
+async def get_network_devices_by_mapping(client_id: int, network_name: str, mapping_by: str, value_mapping: str):
+    if mapping_by == "vendor":
+        return await server.get_devices_by_vendor(client_id, network_name, value_mapping)
+    elif mapping_by == "mac_address":
+        return await server.get_devices_by_mac_address(client_id, network_name, value_mapping)
 
 
 @app.get("/network/devices/{client_id}/{network_name}")

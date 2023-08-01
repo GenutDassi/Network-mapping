@@ -2,7 +2,8 @@ import db_access
 
 
 async def create_network(new_network):
-    await db_access.execute_query("INSERT IGNORE INTO network (client_id, name, location) VALUES (%s, %s, %s);", new_network)
+    await db_access.execute_query("INSERT IGNORE INTO network (client_id, name, location) VALUES (%s, %s, %s);",
+                                  new_network)
     new_network_id = await db_access.execute_query("SELECT LAST_INSERT_ID();")
     print("id", new_network_id)
     new_network_id = new_network_id[0]["LAST_INSERT_ID()"]
@@ -13,7 +14,9 @@ async def create_network(new_network):
 
 
 async def create_connection(src_id, dst_id, protocol):
-    await db_access.execute_query("INSERT IGNORE INTO connection (src_device_id, dst_device_id, protocol) VALUES (%s, %s, %s);",(src_id, dst_id, protocol))
+    await db_access.execute_query(
+        "INSERT IGNORE INTO connection (src_device_id, dst_device_id, protocol) VALUES (%s, %s, %s);",
+        (src_id, dst_id, protocol))
     new_connection_id = await db_access.execute_query("SELECT LAST_INSERT_ID()")
     new_connection_id = new_connection_id[0]["LAST_INSERT_ID()"]
     return new_connection_id
@@ -27,7 +30,8 @@ async def get_network_info(client_id, network_name):
 
 
 async def create_device(ip, mac, id, vendor):
-    await db_access.execute_query(f"INSERT IGNORE INTO device (network_id, ip, mac, vendor) VALUES (%s, %s, %s, %s);", (id, ip, mac, vendor))
+    await db_access.execute_query(f"INSERT IGNORE INTO device (network_id, ip, mac, vendor) VALUES (%s, %s, %s, %s);",
+                                  (id, ip, mac, vendor))
     new_device_id = await db_access.execute_query("SELECT LAST_INSERT_ID() AS last_id;")
     return new_device_id
 
@@ -52,4 +56,21 @@ async def add_protocol_to_connection(connection_id, protocol):
     previous_protocols = await db_access.execute_query("SELECT protocol FROM connection WHERE id=%s", connection_id)
     previous_protocols = previous_protocols[0]["protocol"]
     uptodate_protocols = f"{previous_protocols}, {protocol}"
-    await db_access.execute_query("UPDATE connection SET protocol = %s WHERE id = %s;", (uptodate_protocols, connection_id))
+    await db_access.execute_query("UPDATE connection SET protocol = %s WHERE id = %s;",
+                                  (uptodate_protocols, connection_id))
+
+
+async def get_devices_by_vendor(client_id, network_name, vendor_name):
+    network_id = await db_access.execute_query("SELECT network.id FROM network WHERE client_id=%s AND name=%s;",
+                                               (client_id, network_name))
+    return await db_access.execute_query(
+        "SELECT device.mac, device.ip, device.vendor FROM device WHERE network_id=%s AND vendor = %s;",
+        (network_id, vendor_name))
+
+
+async def get_devices_by_mac_address(client_id, network_name, mac_address):
+    network_id = await db_access.execute_query("SELECT network.id FROM network WHERE client_id=%s AND name=%s;",
+                                               (client_id, network_name))
+    return await db_access.execute_query(
+        "SELECT device.mac, device.ip, device.vendor FROM device WHERE network_id=%s AND mac=%s;",
+        (network_id, mac_address))
