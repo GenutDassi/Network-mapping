@@ -1,5 +1,5 @@
 from tkinter import filedialog
-from mac_vendor_lookup import MacLookup
+from mac_vendor_lookup import AsyncMacLookup
 from scapy.all import *
 from scapy.layers.inet import IP
 from scapy.libs.six import BytesIO
@@ -33,9 +33,9 @@ def get_src_and_dst_mac_address(packet):
     return src_mac, dst_mac
 
 
-def get_vendor_from_mac(mac_address):
+async def get_vendor_from_mac(mac_address):
     try:
-        vendor = MacLookup().lookup(mac_address)
+        vendor = await AsyncMacLookup().lookup(mac_address)
         return vendor
     except Exception as e:
         # print("Error:", e)
