@@ -1,19 +1,18 @@
-from urllib import request
-
-import db_access
+from CRUD import technician_CRUD
+from DB import db_access
 from datetime import datetime, timedelta
-from typing import Union, List
+from typing import Union
 
-from fastapi import Depends, HTTPException, status, Request, Response, encoders, Header
-from fastapi.security import OAuth2PasswordBearer, OAuth2
+from fastapi import Depends, HTTPException, status, Request, Response, encoders
+from fastapi.security import OAuth2PasswordBearer
 
-from jose import JWTError, jwt
+from jose import jwt
 from passlib.context import CryptContext
 
-import technician_in_db
-from authorization_and_aothentication_patterns import OAuth2PasswordBearerWithCookie, TechnicalInDB, TokenData, \
-    Technician
-from network_mapping_api import MyToken
+from authorization_and_authentication.authorization_and_authentication_patterns import MyToken, \
+    OAuth2PasswordBearerWithCookie, Technician, TechnicalInDB
+
+# from authorization_and_authentication_patterns import OAuth2PasswordBearerWithCookie, Technician, MyToken, TechnicalInDB
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -42,7 +41,7 @@ async def login(response: Response, name: str, password: str):
 
 async def signup(name, password):
     hash_password = get_password_hash(password)
-    await technician_in_db.add_technician(name, hash_password)
+    await technician_CRUD.add_technician(name, hash_password)
 
 
 def get_password_hash(password):
@@ -127,7 +126,7 @@ async def get_cookies(request:Request) -> dict:
 
 
 # TODO: complete this function!!!!!!!!!!!!
-async def get_current_active_technician(current_user: Technician = Depends(technician_in_db.get_current_technician)):
+async def get_current_active_technician(current_user: Technician):
     if current_user and current_user.disabled:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user

@@ -1,5 +1,5 @@
-import authorization_and_authentication
-import db_access
+from DB import db_access
+from authorization_and_authentication import authorization_and_authentication
 
 
 async def add_technician(technician_name, technician_password):

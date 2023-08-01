@@ -21,6 +21,11 @@ class TechnicalInDB(Technician):
     password: str
 
 
+class MyToken(BaseModel):
+    access_token: str
+    token_type: str
+
+
 class OAuth2PasswordBearerWithCookie(OAuth2):
     def __init__(
             self,
