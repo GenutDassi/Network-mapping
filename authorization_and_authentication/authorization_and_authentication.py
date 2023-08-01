@@ -12,7 +12,6 @@ from passlib.context import CryptContext
 from authorization_and_authentication.authorization_and_authentication_patterns import MyToken, \
     OAuth2PasswordBearerWithCookie, Technician, TechnicalInDB
 
-# from authorization_and_authentication_patterns import OAuth2PasswordBearerWithCookie, Technician, MyToken, TechnicalInDB
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -120,7 +119,7 @@ async def get_current_technician_name():
     return 'Yosi'
 
 
-async def get_cookies(request:Request) -> dict:
+async def get_cookies(request: Request) -> dict:
     print("-------------cookies:", request.cookies)
     return dict(request.cookies)
 
