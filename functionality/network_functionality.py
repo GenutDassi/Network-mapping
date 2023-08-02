@@ -1,8 +1,10 @@
 from CRUD import technician_CRUD, network_CRUD, device_CRUD, connections_CRUD
 from authorization_and_authentication import authorization_and_authentication
+from exception_decorators.catch_exception import catch_exception
 from pcap_files import pcap_files_access
 
 
+@catch_exception
 # TODO: break this module!!
 async def add_network(client_id, network_name, network_location, file_content):
     technician_id = await technician_CRUD.get_current_technician_id()
@@ -39,6 +41,7 @@ async def add_network(client_id, network_name, network_location, file_content):
     return "error!!!!!!!!!!!!!!!!!!"
 
 
+@catch_exception
 async def get_network_information(client_id, network_name):
     technician_id = await technician_CRUD.get_current_technician_id()
     if authorization_and_authentication.check_permission(technician_id, client_id):
