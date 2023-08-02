@@ -13,7 +13,8 @@ async def get_devices(client_id, network_name):
                                                (client_id, network_name))
     if network_id is ():
         raise Exception("network name is not valid")
-    a = await db_access.execute_query("SELECT device.mac, device.ip, device.vendor FROM device WHERE network_id=%s;", network_id[0]['id'])
+    a = await db_access.execute_query("SELECT device.mac, device.ip, device.vendor FROM device WHERE network_id=%s;",
+                                      network_id[0]['id'])
 
     return a
 
@@ -32,3 +33,8 @@ async def get_devices_by_mac_address(client_id, network_name, mac_address):
     return await db_access.execute_query(
         "SELECT device.mac, device.ip, device.vendor FROM device WHERE network_id=%s AND mac=%s;",
         (network_id[0]['id'], mac_address))
+
+
+async def update_device_as_router(device_id):
+    await db_access.execute_query("UPDATE device SET ip = %s WHERE id = %s;",
+                                  (device_id, None))

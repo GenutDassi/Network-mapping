@@ -21,8 +21,6 @@ async def execute_query(sql_query, *args):
     db_connection = await connect_to_db()
     cursor_object = db_connection.cursor()
     if args:
-        print(args[0])
-        print(sql_query)
         x = cursor_object.execute(sql_query, args[0])
     else:
         x = cursor_object.execute(sql_query)

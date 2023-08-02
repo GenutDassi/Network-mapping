@@ -12,7 +12,6 @@ from passlib.context import CryptContext
 from authorization_and_authentication.authorization_and_authentication_patterns import MyToken, \
     OAuth2PasswordBearerWithCookie, Technician, TechnicalInDB, TokenData
 
-
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 40
@@ -30,9 +29,10 @@ async def login(response: Response, name: str, password: str):
     access_token = create_access_token(
         data={"sub": technician.name}, expires_delta=access_token_expires
     )
+    _token = encoders.jsonable_encoder(access_token)
     response.set_cookie(
         key="Authorization",
-        value=f"Bearer {encoders.jsonable_encoder(access_token)}",
+        value=f"Bearer {_token}",
         httponly=True
     )
     return MyToken(access_token=access_token, token_type="bearer")
@@ -112,4 +112,3 @@ async def get_current_technician(token: str = Depends(oauth2_cookie_scheme)):
 
 async def get_current_active_technician(current_technician: Technician = Depends(get_current_technician)):
     return current_technician
-

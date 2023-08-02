@@ -40,9 +40,7 @@ async def get_vendor_from_mac(mac_address):
         vendor = await AsyncMacLookup().lookup(mac_address)
         return vendor
     except Exception as e:
-        # print("Error:", e)
-        # return None
-        pass
+        return "Unknown"
 
 
 def get_protocol(packet):
