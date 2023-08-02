@@ -1,7 +1,8 @@
 from CRUD import technician_CRUD, network_CRUD
 from authorization_and_authentication import authorization_and_authentication
+from exception_decorators.catch_exception import catch_exception
 
-
+@catch_exception
 async def get_connections(client_id, network_name, technician_id):
     # technician_id = await authorization_and_authentication.get_current_technician_id()
     # technician_id = authorization_and_authentication.get_current_technician()
