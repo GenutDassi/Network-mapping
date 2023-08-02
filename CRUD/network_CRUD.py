@@ -1,6 +1,8 @@
 from DB import db_access
+from exception_decorators.catch_exception import catch_exception
 
 
+@catch_exception
 async def create_network(client_id, name, location):
     await db_access.execute_query("INSERT IGNORE INTO network (client_id, name, location) VALUES (%s, %s, %s);",
                                   (client_id, name, location))
@@ -9,12 +11,14 @@ async def create_network(client_id, name, location):
     return new_network_id
 
 
+@catch_exception
 async def get_network_info(client_id, network_name):
     query = "SELECT network.name, network.location, client.FirstName, client.LastName FROM network INNER JOIN client " \
             "WHERE network.client_id = client.id AND network.name = %s AND client.id = %s;"
     return await db_access.execute_query(query, (network_name, client_id))
 
 
+@catch_exception
 async def get_full_network(client_id, network_name):
     network_id = await db_access.execute_query("SELECT network.id FROM network WHERE client_id=%s AND name=%s;",
                                                (client_id, network_name))

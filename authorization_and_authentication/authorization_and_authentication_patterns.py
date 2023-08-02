@@ -7,6 +7,8 @@ from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security.utils import get_authorization_scheme_param
 from pydantic import BaseModel
 
+from exception_decorators.catch_exception import catch_exception
+
 
 class TokenData(BaseModel):
     username: Union[str, None] = None
@@ -39,6 +41,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         flows = OAuthFlowsModel(password={"tokenUrl": tokenUrl, "scopes": scopes})
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
+    @catch_exception
     async def __call__(self, request: Request) -> Optional[str]:
         authorization: str = request.cookies.get("Authorization")  # changed to accept access token from httpOnly Cookie
 

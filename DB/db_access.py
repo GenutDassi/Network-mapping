@@ -1,8 +1,11 @@
 import pymysql
 
+from exception_decorators.catch_exception import catch_exception
+
 connection_object = None
 
 
+@catch_exception
 async def connect_to_db():
     global connection_object
     if not connection_object:
@@ -16,7 +19,7 @@ async def connect_to_db():
                                             db=db_name, charset=char_set, cursorclass=cursor_type)
     return connection_object
 
-
+@catch_exception
 async def execute_query(sql_query, *args):
     db_connection = await connect_to_db()
     cursor_object = db_connection.cursor()
