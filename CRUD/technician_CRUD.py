@@ -20,7 +20,8 @@ async def is_authorized(technician_id, client_id):
 
 @catch_exception
 async def get_current_technician_id():
-    current_technician_name = await authorization_and_authentication.get_current_technician_name()
-    query = f'SELECT technician.id FROM technician WHERE technician.name = %s'
-    technician_id = await db_access.execute_query(query, current_technician_name)
-    return technician_id[0]["id"]
+    current_technician = await authorization_and_authentication.get_me()
+    # query = f'SELECT technician.id FROM technician WHERE technician.name = %s'
+    # technician_id = await db_access.execute_query(query, current_technician_name)
+    # return technician_id[0]["id"]
+    return current_technician.id

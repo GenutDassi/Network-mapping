@@ -14,9 +14,12 @@ async def create_device(ip, mac, id, vendor):
 async def get_devices(client_id, network_name):
     network_id = await db_access.execute_query("SELECT network.id FROM network WHERE client_id=%s AND name=%s;",
                                                (client_id, network_name))
+    if network_id is ():
+        raise Exception("network name is not valid")
     a = await db_access.execute_query("SELECT device.mac, device.ip, device.vendor FROM device WHERE network_id=%s;", network_id[0]['id'])
 
     return a
+
 
 @catch_exception
 async def get_devices_by_vendor(client_id, network_name, vendor_name):
