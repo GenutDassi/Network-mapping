@@ -4,9 +4,7 @@ from exception_decorators.catch_exception import catch_exception
 
 @catch_exception
 async def add_protocol_to_connection(connection_id, protocol):
-    print("+++++++++++++++++++++++++++",connection_id, protocol)
     previous_protocols = await db_access.execute_query("SELECT protocol FROM connection WHERE id=%s", connection_id)
-    print(previous_protocols)
     previous_protocols = previous_protocols[0]["protocol"]
     uptodate_protocols = f"{previous_protocols}, {protocol}"
     await db_access.execute_query("UPDATE connection SET protocol = %s WHERE id = %s;",

@@ -18,7 +18,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 40
 
 
-@catch_exception
+
 async def login(response: Response, name: str, password: str):
     technician = await authenticate_technician(name, password)
     if not technician:
@@ -39,13 +39,13 @@ async def login(response: Response, name: str, password: str):
     return MyToken(access_token=access_token, token_type="bearer")
 
 
-@catch_exception
+
 async def signup(name, password):
     hash_password = get_password_hash(password)
     await technician_CRUD.add_technician(name, hash_password)
 
 
-@catch_exception
+
 async def check_permission(technician_id, client_id):
     permission = await db_access.execute_query("SELECT * FROM permission WHERE technician_id=%s AND client_id=%s",
                                                (technician_id, client_id))
@@ -63,19 +63,18 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 oauth2_cookie_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="token")
 
 
-@catch_exception
+
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-@catch_exception
+
 async def get_technician_from_db(technician_name: str):
     user_dict = await db_access.execute_query("SELECT * FROM technician WHERE technician.name = %s", technician_name)
     if user_dict:
         return TechnicalInDB(**user_dict[0])
 
 
-@catch_exception
 async def authenticate_technician(technical_name: str, password: str):
     technical = await get_technician_from_db(technical_name)
     if not technical:
@@ -85,7 +84,7 @@ async def authenticate_technician(technical_name: str, password: str):
     return technical
 
 
-@catch_exception
+
 def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None):
     to_encode = data.copy()
     if expires_delta:
@@ -97,7 +96,7 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
     return encoded_jwt
 
 
-@catch_exception
+
 async def get_current_technician(token: str = Depends(oauth2_cookie_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
