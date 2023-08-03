@@ -6,7 +6,6 @@ from fastapi import FastAPI
 
 from API import network_router, tecnichian_router
 
-
 curr_path = os.path.dirname(__file__)
 root_path = os.path.join(curr_path, "../..")
 sys.path.append(root_path)

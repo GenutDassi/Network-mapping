@@ -119,4 +119,3 @@ async def get_current_technician(token: str = Depends(oauth2_cookie_scheme)):
 
 async def get_current_active_technician(current_technician: Technician = Depends(get_current_technician)):
     return current_technician
-
