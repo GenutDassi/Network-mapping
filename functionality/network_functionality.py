@@ -5,13 +5,13 @@ from pcap_files import pcap_files_access
 from fastapi import HTTPException
 
 
-@catch_exception
+# @catch_exception
 async def get_network_information(current_technician, client_id, network_name):
     if await authorization_and_authentication.check_permission(current_technician.id, client_id):
         return await network_CRUD.get_network_info(client_id, network_name)
 
 
-@catch_exception
+# @catch_exception
 async def get_network_connections(current_technician, client_id, network_name):
     if await authorization_and_authentication.check_permission(current_technician.id, client_id):
         return await network_CRUD.get_full_network(client_id, network_name)
@@ -26,7 +26,7 @@ connections_dict = {}
 # the dictionary looks like :
 # {(src_mac, dst_mac):{"id": 3, "protocols": "TCP, UDP"}
 
-@catch_exception
+# @catch_exception
 async def add_network(current_technician, client_id, network_name, network_location, file_content):
     global devices_dict
     global connections_dict
@@ -37,14 +37,13 @@ async def add_network(current_technician, client_id, network_name, network_locat
         network_id = await network_CRUD.create_network(client_id, network_name, network_location)
         for packet in packets:
             src_mac, src_ip, src_vendor, protocol, dst_mac, dst_ip, dst_vendor = await get_packet_info(packet)
-            src_id, dst_id = await add_devices(network_id, src_mac, src_ip, src_vendor, dst_mac, dst_ip, dst_vendor,
-                                               protocol)
-            await add_connection(src_id, src_mac, dst_id, dst_mac, protocol)
+            src_id, dst_id = await add_devices(network_id, src_mac, src_ip, src_vendor, dst_mac, dst_ip, dst_vendor)
+            await add_connection(src_id, src_mac,dst_ip, dst_id, dst_mac, protocol)
         return network_id
     raise HTTPException(status_code=400, detail="you don't have permission for this client")
 
 
-@catch_exception
+# @catch_exception
 async def add_devices(network_id, src_mac, src_ip, src_vendor, dst_mac, dst_ip, dst_vendor):
     global devices_dict
     if src_mac not in devices_dict.keys():
@@ -62,7 +61,7 @@ async def add_devices(network_id, src_mac, src_ip, src_vendor, dst_mac, dst_ip, 
     return src_id, dst_id
 
 
-@catch_exception
+# @catch_exception
 async def add_connection(src_id, src_mac, dst_ip, dst_id, dst_mac, protocol):
     global connections_dict
     if (src_mac, dst_mac) not in connections_dict.keys():
@@ -77,7 +76,7 @@ async def add_connection(src_id, src_mac, dst_ip, dst_id, dst_mac, protocol):
         connections_dict[(src_mac, dst_mac)]["protocols"] += f", {protocol}"
 
 
-@catch_exception
+# @catch_exception
 async def update_if_router(protocol, mac_address, ip_address):
     if devices_dict[mac_address]["ip"] != ip_address and protocol != 'ARP':
         # this is a router!!
@@ -87,7 +86,7 @@ async def update_if_router(protocol, mac_address, ip_address):
         devices_dict[mac_address]["id"][0]['last_id'] = None
 
 
-@catch_exception
+# @catch_exception
 async def get_packet_info(packet):
     src_mac, dst_mac = pcap_files_access.get_src_and_dst_mac_address(packet)
     src_ip, dst_ip = pcap_files_access.get_src_and_dst_ip_address(packet)

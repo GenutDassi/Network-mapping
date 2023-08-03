@@ -41,7 +41,6 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         flows = OAuthFlowsModel(password={"tokenUrl": tokenUrl, "scopes": scopes})
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
-    @catch_exception
     async def __call__(self, request: Request) -> Optional[str]:
         authorization: str = request.cookies.get("Authorization")  # changed to accept access token from httpOnly Cookie
 

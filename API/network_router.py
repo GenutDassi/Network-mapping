@@ -11,28 +11,24 @@ from graphs import network_graph
 router = APIRouter()
 
 
-@catch_exception
 @router.get("/")
 async def root():
     print("server is running!!!")
     return {"message": "Hi , I'm running"}
 
 
-@catch_exception
 @router.get("/network/get-network_info")
 async def get_network_information(client_id: int, network_name: str,
                                   current_technician: Technician = Depends(get_current_active_technician)):
     return await network_functionality.get_network_information(current_technician, client_id, network_name)
 
 
-@catch_exception
 @router.get("/network/get-connections")
 async def get_network_connections(client_id: int, network_name: str,
                                   current_technician: Technician = Depends(get_current_active_technician)):
     return await network_functionality.get_network_connections(current_technician, client_id, network_name)
 
 
-@catch_exception
 @router.get("/network/get-devices-by-prop")
 async def get_network_devices_by_mapping(client_id: int, network_name: str, mapping_by: str, value_mapping: str,
                                          current_technician: Technician = Depends(get_current_active_technician)):
@@ -44,7 +40,6 @@ async def get_network_devices_by_mapping(client_id: int, network_name: str, mapp
                                                                       value_mapping)
 
 
-@catch_exception
 @router.get("/network/get-devices")
 async def get_network_devices(client_id: int, network_name: str,
                               current_technician: Technician = Depends(get_current_active_technician)):
@@ -60,11 +55,12 @@ async def get_network_graph(client_id: int, network_name: str = Form(...),
     return Response(content=buffer.getvalue(), media_type="image/png")
 
 
-@catch_exception
-@router.post("/network/add-network")
+@router.post("/network/add-network/{client_id}")
 async def add_network(client_id: int, network_name: str = Form(...), network_location: str = Form(...),
                       file: UploadFile = File(...),
                       current_technician: Technician = Depends(get_current_active_technician)):
+    print("hello")
+
     file_content = await file.read()
     return await network_functionality.add_network(current_technician, client_id, network_name, network_location,
                                                    file_content)
